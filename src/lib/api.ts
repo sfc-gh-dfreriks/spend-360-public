@@ -6,11 +6,13 @@ const STATIC = import.meta.env.VITE_STATIC === '1';
 const AGENT_BASE = (import.meta.env.VITE_AGENT_URL ?? '').replace(/\/$/, '');
 const DATA_BASE = `${import.meta.env.BASE_URL}data`;
 const BASE = '/api';
+import { getCurrency } from './currency';
 
 function buildParams(categories: string[], companies: string[]): string {
   const params = new URLSearchParams();
   if (categories.length) params.set('categories', categories.join(','));
   if (companies.length) params.set('companies', companies.join(','));
+  params.set('currency', getCurrency());
   return params.toString();
 }
 
@@ -54,16 +56,19 @@ function loadStaticFile(file: string): Promise<any> {
   return p;
 }
 
+// Money-bearing snapshots are baked once per currency under data/<CCY>/.
+const ccyFile = (name: string) => `${getCurrency()}/${name}`;
+
 async function getKeyed<T>(name: string, c: string[], co: string[]): Promise<T> {
   if (STATIC) {
-    const map = await loadStaticFile(name);
+    const map = await loadStaticFile(ccyFile(name));
     return camelizeKeys(map[filterKey(c, co)] ?? {}) as T;
   }
   return liveGet<T>(`/${name}?${buildParams(c, co)}`);
 }
-async function getSingle<T>(name: string): Promise<T> {
-  if (STATIC) return camelizeKeys(await loadStaticFile(name)) as T;
-  return liveGet<T>(`/${name}`);
+async function getSingle<T>(name: string, perCurrency = true): Promise<T> {
+  if (STATIC) return camelizeKeys(await loadStaticFile(perCurrency ? ccyFile(name) : name)) as T;
+  return liveGet<T>(`/${name}${perCurrency ? `?currency=${getCurrency()}` : ''}`);
 }
 
 export function fetchFilters(): Promise<{ categories: string[]; companies: string[] }> {
@@ -76,7 +81,7 @@ export const fetchCategories = (c: string[], co: string[]) => getKeyed<any>('cat
 export const fetchSuppliers = (c: string[], co: string[]) => getKeyed<any>('suppliers', c, co);
 export const fetchContracts = (c: string[], co: string[]) => getKeyed<any>('contracts', c, co);
 export const fetchPurchaseOrders = (c: string[], co: string[]) => getKeyed<any>('purchase-orders', c, co);
-export const fetchLineage = () => getSingle<any>('lineage');
+export const fetchLineage = () => getSingle<any>('lineage', false);
 export const fetchSupplierRisk = () => getSingle<any>('supplier-risk');
 export const fetchSustainability = () => getSingle<any>('sustainability');
 export const fetchSavings = () => getSingle<any>('savings');
