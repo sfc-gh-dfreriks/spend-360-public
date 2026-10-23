@@ -21,6 +21,10 @@ separate serverless Cortex agent when configured.
   # from the spend_360_react monorepo, with the server running:
   EXPORT_BASE=http://localhost:3007 node scripts/export-static.mjs
   ```
+- **Ask Cortex:** each page's "Ask Cortex about <page>" answer for its default
+  question is baked per currency into `public/data/ask_cortex.json` (keyed `<page>?currency=<CCY>`) by the
+  exporter (real Cortex calls at export time). Free-text questions go to `AGENT_URL`
+  if set; otherwise a "not available in this static build" note is shown.
 - **Live agent (optional):** set the repo variable `AGENT_URL` to a deployed Cortex
   agent Worker URL. If unset, the Analyst page shows a "not available" notice but the
   dashboards work fully.
