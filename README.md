@@ -2,8 +2,8 @@
 
 A static, no-login public build of the SAP BDC Spend 360 dashboard, deployed to
 GitHub Pages. Dashboards render from a **point-in-time data snapshot** (no Snowflake
-connection, no credentials in the browser). The optional "Ask the Agent" page calls a
-separate serverless Cortex agent when configured.
+connection, no credentials in the browser). Free-text Ask Cortex questions call a
+separate serverless Cortex agent when configured. The app opens on the Executive Dashboard.
 
 ## How it works
 
@@ -26,7 +26,7 @@ separate serverless Cortex agent when configured.
   exporter (real Cortex calls at export time). Free-text questions go to `AGENT_URL`
   if set; otherwise a "not available in this static build" note is shown.
 - **Live agent (optional):** set the repo variable `AGENT_URL` to a deployed Cortex
-  agent Worker URL. If unset, the Analyst page shows a "not available" notice but the
+  agent Worker URL. If unset, free-text Ask Cortex questions show a "not available" notice but the
   dashboards work fully.
 
 ## Local build
